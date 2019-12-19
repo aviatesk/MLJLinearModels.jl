@@ -1,14 +1,14 @@
 module MLJLinearModels
 
 using Parameters, DocStringExtensions
-using LinearAlgebra, IterativeSolvers
+using LinearAlgebra
 import LinearMaps: LinearMap
 import IterativeSolvers: cg
 import Optim
 
 import MLJBase
 
-import Base.+, Base.-, Base.*, Base./, Base.convert
+import Base.+, Base.-, Base.*, Base./, Base.convert, Base.getproperty
 
 const AVR = AbstractVector{<:Real}
 
@@ -34,7 +34,7 @@ include("glr/utils.jl")
 
 # > Solvers <
 include("fit/solvers.jl")
-include("fit/default.jl")
+include("fit/fit.jl")
 include("fit/analytical.jl")
 # include("fit/grad.jl")
 include("fit/newton.jl")

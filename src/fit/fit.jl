@@ -23,15 +23,8 @@ _solver(::GLR{RobustLoss,<:L2R}, np::NTuple{2,Int}) = LBFGS()
 _solver(::GLR, np::NTuple{2,Int}) = @error "Not yet implemented"
 
 
-"""
-$SIGNATURES
-
-Fit a generalised linear regression model using an appropriate solver based on
-the loss and penalty of the model. A method can, in some cases, be specified.
-"""
-function fit(glr::GLR, X::AbstractMatrix{<:Real}, y::AVR;
-			 solver::Solver=_solver(glr, size(X)))
-    check_nrows(X, y)
+function _prepare_fit(glr, X, y)
+	check_nrows(X, y)
 	n, p = size(X)
 	p += Int(glr.fit_intercept)
 	# allocate cache for temporary computations of size n/p
@@ -40,8 +33,31 @@ function fit(glr::GLR, X::AbstractMatrix{<:Real}, y::AVR;
 	# these are const Refs defined when the module is loaded
 	c = glr.loss isa MultinomialLoss ? maximum(y) : 0
 	allocate(n, p, c)
+end
+
+"""
+$SIGNATURES
+
+Fit a generalised linear regression model using an appropriate solver based on
+the loss and penalty of the model. A solver can, in some cases, be specified.
+"""
+function fit(glr::GLR, X::AbstractMatrix{<:Real}, y::AVR;
+			 solver::Solver=_solver(glr, size(X)))
+    # checks and cache creation
+    _prepare_fit(glr, X, y)
 	# effective call to fit routine
     θ = _fit(glr, solver, X, y)
+	# de-allocate cache
+	deallocate()
+	return θ
+end
+
+function fit(glrcv::GLRCV, X::AbstractMatrix{<:Real}, y::AVR;
+			 solver::Solver=_solver(glrcv.glr, size(X)))
+    # checks and cache creation
+    _prepare_fit(glrcv.glr, X, y)
+	# effective call to fit routine
+    θ = _fitcv(glrcv, solver, X, y)
 	# de-allocate cache
 	deallocate()
 	return θ

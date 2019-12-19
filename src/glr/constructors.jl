@@ -34,6 +34,19 @@ const GLR = GeneralizedLinearRegression
 
 
 """
+GLRCV
+
+Wrapper for a GLR model and a NamedTuple indicating hyperparameters to tune over.
+This wrapper is used for models for which computing the solution for multiple
+hyperparameters is effectively free after computing the first one (e.g. Ridge).
+"""
+mutable struct GLRCV{GLR}
+    glr::GLR
+    hp::NamedTuple
+end
+
+
+"""
 $SIGNATURES
 
 Objective function: ``|Xθ - y|₂²/2``.
@@ -52,6 +65,19 @@ function RidgeRegression(λ::Real=1.0; lambda::Real=λ, fit_intercept::Bool=true
     GLR(penalty=lambda*L2Penalty(),
         fit_intercept=fit_intercept,
         penalize_intercept=penalize_intercept)
+end
+
+"""
+$SIGNATURES
+
+Version of Ridge regression optimised for CV.
+See also [`RidgeRegression`](@ref).
+"""
+function RidgeRegressionCV(λs::Vector{<:Real}=10.0.^-2:2;
+                           lambdas::Vector{<:Real}=λs, args...)
+    isempty(lambdas) && throw(ArgumentError("Expected at least one λ."))
+    all(check_pos.(lambdas))
+    GLRCV(RidgeRegression(lambdas[1]; args...), (lambdas=lambdas,))
 end
 
 
