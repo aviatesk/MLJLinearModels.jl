@@ -38,7 +38,8 @@ function _fit(glr::GLR{L2Loss,<:L2R}, solver::Analytical{:tall}, X, y)
 	p = size(X, 2) + Int(glr.fit_intercept)
 	max_cg_steps = min(solver.max_inner, p)
 	# Form the Hessian map, cost of application H*v is O(np)
-	Hm = LinearMap(Hv!(glr, X, y), p; ismutating=true, isposdef=true, issymmetric=true)
+	Hm = LinearMap(Hv!(glr, X, y), p;
+				   ismutating=true, isposdef=true, issymmetric=true)
 	b  = X'y
 	glr.fit_intercept && (b = vcat(b, sum(y)))
 	return cg(Hm, b; maxiter=max_cg_steps)
