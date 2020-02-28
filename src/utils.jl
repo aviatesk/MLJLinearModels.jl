@@ -99,14 +99,42 @@ end
 """
 $SIGNATURES
 
-Form (X'X) while being memory aware (assuming p ≪ n).
+Form (X'X) while being memory aware (assuming p ≪ n). Dominating cost O(np²).
 """
 function form_XtX(X, fit_intercept, lambda=0)
 	if fit_intercept
 		n, p = size(X)
-        XtX  = zeros(p+1, p+1)
+        XtX  = zeros(eltype(X), p+1, p+1)
         Xt1  = sum(X, dims=1)
         mul!(view(XtX, 1:p, 1:p), X', X) # O(np²)
+        @inbounds for i in 1:p
+            XtX[i, end] = XtX[end, i] = Xt1[i]
+        end
+        XtX[end, end] = n
+    else
+        XtX = X'*X # O(np²)
+    end
+	if !iszero(lambda)
+		λ = convert(eltype(XtX), lambda)
+		@inbounds for i in 1:size(XtX, 1)
+			XtX[i,i] += λ
+		end
+	end
+	return Hermitian(XtX)
+end
+
+
+"""
+$SIGNATURES
+
+Form (XX') while being memory aware (assuming n ≪ p). Dominating cost O(pn²).
+"""
+function form_XXt(X, fit_intercept, lambda=0)
+	if fit_intercept
+		n, p = size(X)
+        XXt  = zeros(eltype(X), n, n)
+        Xt1  = sum(X, dims=1)
+        mul!(view(XtX, 1:p, 1:p), X, X') # O(pn²)
         @inbounds for i in 1:p
             XtX[i, end] = XtX[end, i] = Xt1[i]
         end

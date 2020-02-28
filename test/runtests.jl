@@ -1,5 +1,5 @@
 using MLJLinearModels, Test, LinearAlgebra, Random
-import MLJBase
+# import MLJBase
 DO_COMPARISONS = false; include("testutils.jl")
 
 m("UTILS"); include("utils.jl")
@@ -24,7 +24,7 @@ m("FIT", false); begin
     mm("quantile & LAD");         include("fit/quantile.jl")
 end
 
-m("MLJ", false); begin
-    mm("metadata");    include("interface/meta.jl")
-    mm("fit-predict"); include("interface/fitpredict.jl")
-end
+# m("MLJ", false); begin
+#     mm("metadata");    include("interface/meta.jl")
+#     mm("fit-predict"); include("interface/fitpredict.jl")
+# end

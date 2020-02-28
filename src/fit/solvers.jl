@@ -16,10 +16,12 @@ abstract type Solver end
 
 # ===================== analytical.jl
 
-@with_kw struct Analytical <: Solver
+@with_kw struct Analytical{Symbol} <: Solver
     iterative::Bool = false
     max_inner::Int  = 200
 end
+
+Analytical(a...; kw...) = Analytical{:tall}(a...; kw...)
 
 CG() = Analytical(; iterative=true)
 
